@@ -1,3 +1,4 @@
+#region DEVICES
 # Hardware configuration code
 RightTopMotor = Motor(Ports.PORT1, GearSetting.RATIO_18_1, True)
 RightBotMotor = Motor(Ports.PORT2, GearSetting.RATIO_18_1, False)
@@ -13,6 +14,7 @@ brain_precision = 0
 vexcode_console_precision = 0
 vexcode_controller_1_precision = 0
 
+#endregion DEVICES
 #region CONFIG
 #*************************#
 #     MEGATRON CONFIG     #
@@ -65,23 +67,19 @@ def driver_control():
         driveRightVel = Controller1.axis3.position()
         # Decrease if thrust is forward
         if Controller1.axis3.position() > 0:
-            # <0 means we steer left, so we decrease left side
+            # <0 means steer left, so decrease left side
             if Controller1.axis1.position() < 0:
-                # axis is <0 so we add to decrease
                 driveLeftVel = driveLeftVel + Controller1.axis1.position()
-            # >0 means we steer right, so we decrease right side
+            # >0 means steer right, so decrease right side
             if Controller1.axis1.position() > 0:
-                # axis is >0 so we subtract to decrease
                 driveRightVel = driveRightVel + -(Controller1.axis1.position())
         # Increase if thrust is forward
         if Controller1.axis3.position() < 0:
-            # <0 means we steer left, so we increase left side
+            # <0 means steer left, so increase left side
             if Controller1.axis1.position() < 0:
-                # axis is <0 so we subtract to increase
                 driveLeftVel = driveLeftVel + -(Controller1.axis1.position())
-            # >0 means we steer right, so we decrease right side
+            # >0 means steer right, so decrease right side
             if Controller1.axis1.position() > 0:
-                # axis is >0 so we add to increase
                 driveRightVel = driveRightVel + Controller1.axis1.position()
         # Just set speeds if thrust is 0
         if Controller1.axis3.position() == 0:
