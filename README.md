@@ -1,3 +1,5 @@
+To run code: make a python pj in vexcode and paste all of main.py in it
+
 Open source control (3rd icon from the top in the left sidebar), download git when it asks you  
 Run in VS Code shell (ctrl+\`):  
 ```
