@@ -51,6 +51,7 @@ def set_all_motor_vel(vel):
     LeftTopMotor.set_velocity(vel, PERCENT)
     LeftBotMotor.set_velocity(vel, PERCENT)
 
+#region MANUAL CONTROL
 #------------------#
 # MANUAL FUNCTIONS #
 #------------------#
@@ -180,7 +181,7 @@ def driver_shake():
         shakeRightVel = 0
         wait(20, MSEC)
 
-
+#region AUTON TOOLKIT
 #-----------------#
 # AUTON FUNCTIONS #
 #-----------------#
@@ -251,15 +252,16 @@ def auton_score_ring(ram):
     while not RampMotor.is_done():
         wait(5, MSEC)
 
-# AUTON SEQUENCE
+#region AUTON SEQUENCE
 def auton_sequence():
     auton_move_straight_cm(60, True)
     auton_turn_right_deg(45)
     auton_score_ring(ram=True)
 
-#----------#
-#   MISC   #
-#----------#
+#region DEBUG
+#---------#
+#  DEBUG  #
+#---------#
 
 def draw_debug():
     while True:
@@ -288,6 +290,7 @@ def draw_debug():
         Controller1.screen.print(f"4:{LeftBotMotor.temperature(PERCENT)}{LeftBot_status}")
         wait(200, MSEC)
 
+#region INIT
 #-----------#
 # INIT CODE #
 #-----------#
