@@ -144,7 +144,7 @@ def mogomech_toggle(): #
         MogomechSolenoid.set(False)
 
 # Neutral stake slapper
-def ready_slap(): # bring slapper to the upright (before slap) position
+def slap_ready(): # bring slapper to the upright (before slap) position
     global readyToSlap
     # resetting to 0 and using spin_for to stop spinning into robot (_for sets a direction, _to_position doesn't)
     SlapMotor.spin_to_position(0, DEGREES, wait=True)
@@ -155,7 +155,7 @@ def slap_ring():
     global readyToSlap
     readyToSlap = False
     SlapMotor.spin(FORWARD)
-def stop_slap():
+def slap_stop():
     SlapMotor.stop()
 
 # Shakey-shakey
@@ -412,7 +412,6 @@ def draw_debug_controller():
 
 # shaky-shaky
 Controller1.buttonY.pressed(shake_start)
-Controller1.buttonY.pressed(shake_stop)
 # intake
 Controller1.buttonL1.pressed(ramp_fw)
 Controller1.buttonL2.pressed(ramp_bw)
@@ -421,15 +420,18 @@ Controller1.buttonR2.pressed(intake_bw)
 # mogomech
 Controller1.buttonB.pressed(mogomech_toggle)
 # slapper
-Controller1.buttonX.pressed(ready_slap)
+Controller1.buttonX.pressed(slap_ready)
 Controller1.buttonA.pressed(slap_ring)
+
 # releases
+Controller1.buttonY.released(shake_stop)
+
 Controller1.buttonL1.released(ramp_stop)
 Controller1.buttonL2.released(ramp_stop)
 Controller1.buttonR1.released(intake_stop)
 Controller1.buttonR2.released(intake_stop)
 
-Controlelr1.buttonA.released(stop_slap)
+Controller1.buttonA.released(slap_stop)
 
 # Other keys:
 
@@ -462,8 +464,6 @@ def drive_init():
     # start driver mode tasks
     driver_tasks = [
             Thread(driver_control),
-            Thread(driver_shake),
-            Thread(driver_intake),
             Thread(draw_debug_brain)
         ]
     # auton_manual needs to print to controller
