@@ -30,9 +30,10 @@ mogomechOn = False
 # Auton-specific
 BOT_CIRCUMFERENCE = 109.55 # distance between wheels
 DEG_TO_CM = 7.66 # degrees of drivebase motor rotation per centimeter
-autonVel = 30 # drivebase velocity in auton
-autonRamVel = 60 # velocity for ramming into rings
-
+autonVel = 20 # drivebase velocity in auton
+autonRamVel = 50 # velocity for ramming into rings
+autonRamDistance = 20
+drivePause = False
 auton_debug = True # set this to true for auton functions in driver mode (also disables controller temperature display)
 
 # Shake settings
@@ -72,51 +73,52 @@ def set_all_motor_vel(vel):
 
 # driving
 def driver_control():
-    global shakeLeftVel, shakeRightVel
+    global shakeLeftVel, shakeRightVel, drivePause
     while True:
-        # Set both sides to thrust stick
-        driveLeftVel = Controller1.axis3.position()
-        driveRightVel = Controller1.axis3.position()
-        # Decrease if thrust is forward
-        if Controller1.axis3.position() > 0:
-            # <0 means steer left, so decrease left side
-            if Controller1.axis1.position() < 0:
-                driveLeftVel = driveLeftVel + Controller1.axis1.position()
-            # >0 means steer right, so decrease right side
-            if Controller1.axis1.position() > 0:
-                driveRightVel = driveRightVel + -(Controller1.axis1.position())
-        # Increase if thrust is forward
-        if Controller1.axis3.position() < 0:
-            # <0 means steer left, so increase left side
-            if Controller1.axis1.position() < 0:
-                driveLeftVel = driveLeftVel + -(Controller1.axis1.position())
-            # >0 means steer right, so decrease right side
-            if Controller1.axis1.position() > 0:
-                driveRightVel = driveRightVel + Controller1.axis1.position()
-        # Just set speeds if thrust is 0
-        if Controller1.axis3.position() == 0:
-            # Left
-            if Controller1.axis1.position() < 0:
-                driveRightVel = math.fabs(Controller1.axis1.position())
-                driveLeftVel = -(math.fabs(Controller1.axis1.position()))
-            # Right
-            if Controller1.axis1.position() > 0:
-                driveLeftVel = math.fabs(Controller1.axis1.position())
-                driveRightVel = -(math.fabs(Controller1.axis1.position()))
-        # Apply
-        finalLeftVel = driveLeftVel + shakeLeftVel
-        finalRightVel = driveRightVel + shakeRightVel
-
-        RightTopMotor.set_velocity(finalRightVel, PERCENT)
-        RightBotMotor.set_velocity(finalRightVel, PERCENT)
-        LeftTopMotor.set_velocity(finalLeftVel, PERCENT)
-        LeftBotMotor.set_velocity(finalLeftVel, PERCENT)
-
-        RightTopMotor.spin(FORWARD)
-        RightBotMotor.spin(FORWARD)
-        LeftTopMotor.spin(FORWARD)
-        LeftBotMotor.spin(FORWARD)
-
+        if not drivePause:
+            # Set both sides to thrust stick
+            driveLeftVel = Controller1.axis3.position()
+            driveRightVel = Controller1.axis3.position()
+            # Decrease if thrust is forward
+            if Controller1.axis3.position() > 0:
+                # <0 means steer left, so decrease left side
+                if Controller1.axis1.position() < 0:
+                    driveLeftVel = driveLeftVel + Controller1.axis1.position()
+                # >0 means steer right, so decrease right side
+                if Controller1.axis1.position() > 0:
+                    driveRightVel = driveRightVel + -(Controller1.axis1.position())
+            # Increase if thrust is forward
+            if Controller1.axis3.position() < 0:
+                # <0 means steer left, so increase left side
+                if Controller1.axis1.position() < 0:
+                    driveLeftVel = driveLeftVel + -(Controller1.axis1.position())
+                # >0 means steer right, so decrease right side
+                if Controller1.axis1.position() > 0:
+                    driveRightVel = driveRightVel + Controller1.axis1.position()
+            # Just set speeds if thrust is 0
+            if Controller1.axis3.position() == 0:
+                # Left
+                if Controller1.axis1.position() < 0:
+                    driveRightVel = math.fabs(Controller1.axis1.position())
+                    driveLeftVel = -(math.fabs(Controller1.axis1.position()))
+                # Right
+                if Controller1.axis1.position() > 0:
+                    driveLeftVel = math.fabs(Controller1.axis1.position())
+                    driveRightVel = -(math.fabs(Controller1.axis1.position()))
+            # Apply
+            finalLeftVel = driveLeftVel + shakeLeftVel
+            finalRightVel = driveRightVel + shakeRightVel
+    
+            RightTopMotor.set_velocity(finalRightVel, PERCENT)
+            RightBotMotor.set_velocity(finalRightVel, PERCENT)
+            LeftTopMotor.set_velocity(finalLeftVel, PERCENT)
+            LeftBotMotor.set_velocity(finalLeftVel, PERCENT)
+    
+            RightTopMotor.spin(FORWARD)
+            RightBotMotor.spin(FORWARD)
+            LeftTopMotor.spin(FORWARD)
+            LeftBotMotor.spin(FORWARD)
+    
         wait(20, MSEC)
 
 # Intake/ramp controls
@@ -144,16 +146,11 @@ def mogomech_toggle(): #
         MogomechSolenoid.set(False)
 
 # Neutral stake slapper
-def slap_ready(): # bring slapper to the upright (before slap) position
-    global readyToSlap
+def slap_back(): # bring slapper to the upright (before slap) position
     # resetting to 0 and using spin_for to stop spinning into robot (_for sets a direction, _to_position doesn't)
-    SlapMotor.spin_to_position(0, DEGREES, wait=True)
-    SlapMotor.spin_for(REVERSE, 180, DEGREES, wait=True)
-    readyToSlap = True
+    SlapMotor.spin(REVERSE)
 # spin while A held
-def slap_ring(): 
-    global readyToSlap
-    readyToSlap = False
+def slap_forward(): 
     SlapMotor.spin(FORWARD)
 def slap_stop():
     SlapMotor.stop()
@@ -241,7 +238,7 @@ def auton_move_straight_cm(d_cm, wait=True):
         wait_for_motion_stop()
 
 def auton_score_ring(ram):
-    global autonRamVel, autonVel, autonRamDistance
+    global autonRamVel, autonVel
     # ram into ring
     if ram > 0:
         # Faster motors for ramming
@@ -253,12 +250,12 @@ def auton_score_ring(ram):
     while not RingDistanceSensor.object_distance(MM) < 23:
         wait(20, MSEC)
     wait(250, MSEC)
+    # take ring up
+    RampMotor.spin_for(FORWARD, 5, TURNS, wait=False)
+    wait(250, MSEC)
     IntakeMotor.stop()
     # set drivebase velocity back to normal
     set_all_motor_vel(autonVel)
-
-    # take ring up
-    RampMotor.spin_for(FORWARD, 5, TURNS)
     while not RampMotor.is_done():
         wait(20, MSEC)
 
@@ -278,6 +275,7 @@ def auton_sequence():
 
 # manual controls for launching auton routines - to make routes
 def auton_manual():
+    global drivePause, autonVel, autonRamDistance
     set_all_motor_vel(autonVel)
 
     lastAction = ""
@@ -287,19 +285,25 @@ def auton_manual():
         # L1 makes fw and bw run 2 cm instead of 10 for precise controls
         if Controller1.buttonL1.pressing():
             if Controller1.buttonUp.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
                 if lastAction != "lfw":
                     repeat = 1
                     lastAction = "lfw"
                 else:
                     repeat += 1
                 auton_move_straight_cm(2,True)
-    
-                Controller1.screen.set_cursor(2,1)
-                Controller1.screen.clear_row(2)
+
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
                 Controller1.screen.print(repeat*2, "fw")
-                
+                drivePause = False
             
             if Controller1.buttonDown.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
                 if lastAction != "lbw":
                     repeat = 1
                     lastAction = "lbw"
@@ -307,12 +311,58 @@ def auton_manual():
                     repeat += 1
                 auton_move_straight_cm(-2,True)
     
-                Controller1.screen.set_cursor(2,1)
-                Controller1.screen.clear_row(2)
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
                 Controller1.screen.print(2*repeat, "bw")
+                drivePause = False
+
+            if Controller1.buttonLeft.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
+                if lastAction != "ll":
+                    repeat = 1
+                    lastAction = "ll"
+                else:
+                    repeat += 1
+                auton_turn_left_deg(5)
+    
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
+                Controller1.screen.print(repeat*5, "deg left")
+                drivePause = False
+
+            if Controller1.buttonRight.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
+                if lastAction != "lr":
+                    repeat = 1
+                    lastAction = "lr"
+                else:
+                    repeat += 1
+                auton_turn_right_deg(5)
+    
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
+                Controller1.screen.print(repeat*5, "deg right")
+                drivePause = False
+    
+            if Controller1.buttonA.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
+                auton_score_ring(autonRamDistance)
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
+                Controller1.screen.print("score ring")
+                drivePause = False
 
         else:
             if Controller1.buttonUp.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
                 if lastAction != "fw":
                     repeat = 1
                     lastAction = "fw"
@@ -320,12 +370,15 @@ def auton_manual():
                     repeat += 1
                 auton_move_straight_cm(10,True)
     
-                Controller1.screen.set_cursor(2,1)
-                Controller1.screen.clear_row(2)
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
                 Controller1.screen.print(repeat*10, "fw")
-                
+                drivePause = False                
             
             if Controller1.buttonDown.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
                 if lastAction != "bw":
                     repeat = 1
                     lastAction = "bw"
@@ -333,75 +386,72 @@ def auton_manual():
                     repeat += 1
                 auton_move_straight_cm(-10,True)
     
-                Controller1.screen.set_cursor(2,1)
-                Controller1.screen.clear_row(2)
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
                 Controller1.screen.print(10*repeat, "bw")
+                drivePause = False
     
             if Controller1.buttonLeft.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
                 if lastAction != "l":
                     repeat = 1
                     lastAction = "l"
                 else:
                     repeat += 1
-                auton_turn_left_deg(5)
+                auton_turn_left_deg(10)
     
-                Controller1.screen.set_cursor(2,1)
-                Controller1.screen.clear_row(2)
-                Controller1.screen.print(repeat*5, "deg left")
+                Controller1.screen.set_cursor(3,1)
+                Controller1.screen.clear_row(3)
+                Controller1.screen.print(repeat*10, "deg left")
+                drivePause = False
     
             if Controller1.buttonRight.pressing():
+                drivePause = True
+                wait(20, MSEC)
+                set_all_motor_vel(autonVel)
                 if lastAction != "r":
                     repeat = 1
                     lastAction = "r"
                 else:
                     repeat += 1
-                auton_turn_right_deg(5)
+                auton_turn_right_deg(10)
     
-                Controller1.screen.set_cursor(2,1)
-                Controller1.screen.clear_row(2)
-                Controller1.screen.print(repeat*5, "deg right")
-    
-            if Controller1.buttonA.pressing():
-                auton_score_ring(20)
                 Controller1.screen.set_cursor(3,1)
                 Controller1.screen.clear_row(3)
-                Controller1.screen.print("score ring")
+                Controller1.screen.print(repeat*10, "deg right")
+                drivePause = False
 
         wait(200, MSEC)
 
 
 def draw_debug_brain():
     while True:
-        RightTop_status = "SPINNING" if RightTopMotor.is_spinning() else "stopped"
-        RightBot_status = "SPINNING" if RightBotMotor.is_spinning() else "stopped"
-        LeftTop_status = "SPINNING" if LeftTopMotor.is_spinning() else "stopped"
-        LeftBot_status = "SPINNING" if LeftTopMotor.is_spinning() else "stopped"
         # Brain screen
         brain.screen.clear_screen()
         brain.screen.set_cursor(1,1)
-        brain.screen.print("RightTopMotor (1): t=",RightTopMotor.temperature(PERCENT),"% pos=",RightTopMotor.position(),RightTop_status, precision=brain_precision, sep="")
+        brain.screen.print("RightTopMotor (1): temp=",RightTopMotor.temperature(PERCENT),"%"," pos=",RightTopMotor.position(), precision=brain_precision, sep="")
         brain.screen.next_row()
-        brain.screen.print("RightBotMotor (2): t=",RightBotMotor.temperature(PERCENT),"% pos=",RightBotMotor.position(),RightBot_status, precision=brain_precision, sep="")
+        brain.screen.print("RightBotMotor (2): temp=",RightBotMotor.temperature(PERCENT),"%"," pos=",RightBotMotor.position(), precision=brain_precision, sep="")
         brain.screen.next_row()
-        brain.screen.print("LeftTopMotor (3): t=",LeftTopMotor.temperature(PERCENT),"% pos=",LeftTopMotor.position(),LeftTop_status, precision=brain_precision, sep="")
+        brain.screen.print("LeftTopMotor (3): temp=",LeftTopMotor.temperature(PERCENT),"%"," pos=",LeftTopMotor.position(), precision=brain_precision, sep="")
         brain.screen.next_row()
-        brain.screen.print("LeftBotMotor (4): t=",LeftBotMotor.temperature(PERCENT),"% pos=",LeftBotMotor.position(),LeftBot_status, precision=brain_precision, sep="")
+        brain.screen.print("LeftBotMotor (4): temp=",LeftBotMotor.temperature(PERCENT),"%"," pos=",LeftBotMotor.position(), precision=brain_precision, sep="")
         brain.screen.next_row()
         brain.screen.print("RingDistanceSensor (20): ",RingDistanceSensor.object_distance(MM), "mm", precision=brain_precision, sep="")
+        wait(200, MSEC)
 def draw_debug_controller():
     while True:
-        RightTop_status = "SPINNING" if RightTopMotor.is_spinning() else "stopped"
-        RightBot_status = "SPINNING" if RightBotMotor.is_spinning() else "stopped"
-        LeftTop_status = "SPINNING" if LeftTopMotor.is_spinning() else "stopped"
-        LeftBot_status = "SPINNING" if LeftTopMotor.is_spinning() else "stopped"
-
-        Controller1.screen.clear_screen()
+        # Controller screen
+        Controller1.screen.clear_row(1)
+        Controller1.screen.clear_row(2)
         Controller1.screen.set_cursor(1,1)
-        Controller1.screen.print("1:",RightTopMotor.temperature(PERCENT),RightTop_status[:1],sep="",precision=0)
-        Controller1.screen.print("2:",RightBotMotor.temperature(PERCENT),RightBot_status[:1],sep="",precision=0)
+        Controller1.screen.print("1 ",RightTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
+        Controller1.screen.print("2 ",RightBotMotor.temperature(PERCENT),"%",sep="",precision=0)
         Controller1.screen.next_row()
-        Controller1.screen.print("3:",LeftTopMotor.temperature(PERCENT),LeftTop_status[:1],sep="",precision=0)
-        Controller1.screen.print("4:",LeftBotMotor.temperature(PERCENT),LeftBot_status[:1],sep="",precision=0)
+        Controller1.screen.print("3 ",LeftTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
+        Controller1.screen.print("4 ",LeftBotMotor.temperature(PERCENT),"%",sep="",precision=0)
         wait(200, MSEC)
         
 #endregion DEBUG
@@ -420,8 +470,8 @@ Controller1.buttonR2.pressed(intake_bw)
 # mogomech
 Controller1.buttonB.pressed(mogomech_toggle)
 # slapper
-Controller1.buttonX.pressed(slap_ready)
-Controller1.buttonA.pressed(slap_ring)
+Controller1.buttonX.pressed(slap_back)
+Controller1.buttonA.pressed(slap_forward)
 
 # releases
 Controller1.buttonY.released(shake_stop)
@@ -432,6 +482,7 @@ Controller1.buttonR1.released(intake_stop)
 Controller1.buttonR2.released(intake_stop)
 
 Controller1.buttonA.released(slap_stop)
+Controller1.buttonX.released(slap_stop)
 
 # Other keys:
 
@@ -464,13 +515,10 @@ def drive_init():
     # start driver mode tasks
     driver_tasks = [
             Thread(driver_control),
-            Thread(draw_debug_brain)
+            Thread(draw_debug_brain),
+            Thread(draw_debug_controller),
+            Thread(auton_manual)
         ]
-    # auton_manual needs to print to controller
-    if not auton_debug:
-        driver_tasks.append(Thread(draw_debug_controller))
-    else:
-        driver_tasks.append(Thread(auton_manual))
 
     # Wait for the driver control period to end
     while(competition.is_driver_control() and competition.is_enabled()):
