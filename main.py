@@ -24,34 +24,30 @@ vexcode_controller_1_precision = 0
 
 myVariable = 0 # holy variable, we don't use it but i will personally execute anyone who removes it
 
-# Mogomech state
-mogomechOn = False
+drivePause = False # flag to stop driving when manual auton commands are running
+mogomechOn = False # flag for toggling mogomech
 
-# Auton-specific
+# Auton constants
 BOT_CIRCUMFERENCE = 109.55 # distance between wheels
 DEG_TO_CM = 7.66 # degrees of drivebase motor rotation per centimeter
 autonVel = 20 # drivebase velocity in auton
 autonRamVel = 50 # velocity for ramming into rings
-autonRamDistance = 20
-drivePause = False
-auton_debug = True # set this to true for auton functions in driver mode (also disables controller temperature display)
-
-# Shake settings
-shakeVel = 100 # % speed amplitude of shake
-shakeInterval = 150 # delay between alternating directions (ms)
-straightShake = True # move forward-back or spin left-right
-shakeRumble = "-" # rumble pattern as morse code (...---...)
-# for storing shake speed modifier
-shakeLeftVel = 0
-shakeRightVel = 0
+autonRamDistance = 20 # distance to ram into rings for
 
 # Intake
 intakeVel = 100
 rampVel = 100
-
 # Slapping thing
 slapVel = 50
-readyToSlap = False
+
+# Shake settings
+shakeVel = 100 # motor % vel when shaking
+shakeInterval = 150 # delay between alternating shake directions (ms)
+straightShake = True # move forward-back or spin left-right
+shakeRumble = "." # rumble pattern as morse code (...---...)
+# for storing shake speed modifier
+shakeLeftVel = 0
+shakeRightVel = 0
 
 #endregion CONFIG
 #********************#
@@ -75,37 +71,16 @@ def set_all_motor_vel(vel):
 def driver_control():
     global shakeLeftVel, shakeRightVel, drivePause
     while True:
-        if not drivePause:
-            # Set both sides to thrust stick
+        if not drivePause: # this flag is set when manual auton commands are running
+            # Set both sides to thrust stick initially
             driveLeftVel = Controller1.axis3.position()
             driveRightVel = Controller1.axis3.position()
-            # Decrease if thrust is forward
-            if Controller1.axis3.position() > 0:
-                # <0 means steer left, so decrease left side
-                if Controller1.axis1.position() < 0:
-                    driveLeftVel = driveLeftVel + Controller1.axis1.position()
-                # >0 means steer right, so decrease right side
-                if Controller1.axis1.position() > 0:
-                    driveRightVel = driveRightVel + -(Controller1.axis1.position())
-            # Increase if thrust is forward
-            if Controller1.axis3.position() < 0:
-                # <0 means steer left, so increase left side
-                if Controller1.axis1.position() < 0:
-                    driveLeftVel = driveLeftVel + -(Controller1.axis1.position())
-                # >0 means steer right, so decrease right side
-                if Controller1.axis1.position() > 0:
-                    driveRightVel = driveRightVel + Controller1.axis1.position()
-            # Just set speeds if thrust is 0
-            if Controller1.axis3.position() == 0:
-                # Left
-                if Controller1.axis1.position() < 0:
-                    driveRightVel = math.fabs(Controller1.axis1.position())
-                    driveLeftVel = -(math.fabs(Controller1.axis1.position()))
-                # Right
-                if Controller1.axis1.position() > 0:
-                    driveLeftVel = math.fabs(Controller1.axis1.position())
-                    driveRightVel = -(math.fabs(Controller1.axis1.position()))
-            # Apply
+
+            # Change vel based on steering (right) stick
+            driveLeftVel = driveLeftVel + Controller1.axis1.position()
+            driveRightVel = driveRightVel - Controller1.axis.position()
+
+            # Mux with shake (if any) and apply to drivebase
             finalLeftVel = driveLeftVel + shakeLeftVel
             finalRightVel = driveRightVel + shakeRightVel
     
@@ -118,7 +93,6 @@ def driver_control():
             RightBotMotor.spin(FORWARD)
             LeftTopMotor.spin(FORWARD)
             LeftBotMotor.spin(FORWARD)
-    
         wait(20, MSEC)
 
 # Intake/ramp controls
@@ -131,9 +105,9 @@ def intake_stop():
 
 def ramp_fw(): # L1
     RampMotor.spin(REVERSE)
-def ramp_bw():
+def ramp_bw(): # L2
     RampMotor.spin(FORWARD)
-def ramp_stop(): # L2
+def ramp_stop():
     RampMotor.stop()
 
 # Mogomech
