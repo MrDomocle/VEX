@@ -139,9 +139,7 @@ def shake_stop():
 # AUTON FUNCTIONS #
 #-----------------#
 
-def wait_for_motion_stop():
-    while not (RightTopMotor.is_done() and RightBotMotor.is_done() and LeftTopMotor.is_done() and LeftBotMotor.is_done()):
-        wait(20, MSEC)
+
 
 def auton_turn_left_deg(deg):
     global BOT_CIRCUMFERENCE
