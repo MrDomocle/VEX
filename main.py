@@ -30,9 +30,10 @@ mogomechOn = False # flag for toggling mogomech
 # Auton constants
 BOT_CIRCUMFERENCE = 109.55 # distance between wheels
 DEG_TO_CM = 7.66 # degrees of drivebase motor rotation per centimeter
+RAMP_FULL_DEG = 1241 # full ramp turn
 autonVel = 20 # drivebase velocity in auton
 autonRamVel = 50 # velocity for ramming into rings
-autonRamDistance = 20 # distance to ram into rings for
+autonRamDist = 20 # distance to ram into rings for
 
 # Intake
 intakeVel = 100
@@ -78,7 +79,7 @@ def driver_control():
 
             # Change vel based on steering (right) stick
             driveLeftVel = driveLeftVel + Controller1.axis1.position()
-            driveRightVel = driveRightVel - Controller1.axis.position()
+            driveRightVel = driveRightVel - Controller1.axis1.position()
 
             # Mux with shake (if any) and apply to drivebase
             finalLeftVel = driveLeftVel + shakeLeftVel
@@ -212,7 +213,7 @@ def auton_move_straight_cm(d_cm, wait=True):
         wait_for_motion_stop()
 
 def auton_score_ring(ram):
-    global autonRamVel, autonVel
+    global autonRamVel, autonVel, RAMP_FULL_DEG
     # ram into ring
     if ram > 0:
         # Faster motors for ramming
@@ -220,14 +221,20 @@ def auton_score_ring(ram):
         auton_move_straight_cm(ram, wait=False)
     IntakeMotor.spin(FORWARD)
     
-    # wait until ring passes bottom intake
+    # Take into bot
     while not RingDistanceSensor.object_distance(MM) < 23:
         wait(20, MSEC)
     wait(250, MSEC)
-    # take ring up
-    RampMotor.spin_for(FORWARD, 5, TURNS, wait=False)
+
+    # Ramp
+    # move ring a little at first - ring usually in a bad position after this
+    RampMotor.spin_for(FORWARD, 1, TURN, wait=True)
+    # let ring settle
     wait(250, MSEC)
-    IntakeMotor.stop()
+    # take ring up the stake (also subtract the turn made to settle ring)
+    RampMotor.spin_for(FORWARD, RAMP_FULL_DEG-360, DEGREES, wait=False)
+    wait(250, MSEC) # time for ring to exit intake
+    IntakeMotor.stop() # don't need it anymore
     # set drivebase velocity back to normal
     set_all_motor_vel(autonVel)
     while not RampMotor.is_done():
@@ -236,10 +243,7 @@ def auton_score_ring(ram):
 #endregion AUTON TOOLKIT
 #region AUTON SEQUENCE
 def auton_sequence():
-    auton_move_straight_cm(23, True)
-    auton_turn_left_deg(45)
-    auton_move_straight_cm(78)
-    auton_score_ring(ram=True)
+    auton_score_ring(autonRamDist)
 
 #endregion AUTON SEQUENCE
 #region DEBUG
@@ -248,15 +252,45 @@ def auton_sequence():
 #---------#
 
 # manual controls for launching auton routines - to make routes
-def auton_manual():
-    global drivePause, autonVel, autonRamDistance
+def debug_fn():
+    global drivePause, autonVel, autonRamDist
+    # Print regular debug
+    # Brain screen
+    brain.screen.clear_screen()
+    brain.screen.set_cursor(1,1)
+    brain.screen.print("RightTopMotor (1): temp=",RightTopMotor.temperature(PERCENT),"%"," pos=",RightTopMotor.position(), precision=brain_precision, sep="")
+    brain.screen.next_row()
+    brain.screen.print("RightBotMotor (2): temp=",RightBotMotor.temperature(PERCENT),"%"," pos=",RightBotMotor.position(), precision=brain_precision, sep="")
+    brain.screen.next_row()
+    brain.screen.print("LeftTopMotor (3): temp=",LeftTopMotor.temperature(PERCENT),"%"," pos=",LeftTopMotor.position(), precision=brain_precision, sep="")
+    brain.screen.next_row()
+    brain.screen.print("LeftBotMotor (4): temp=",LeftBotMotor.temperature(PERCENT),"%"," pos=",LeftBotMotor.position(), precision=brain_precision, sep="")
+    brain.screen.next_row()
+    brain.screen.print("Ramp (21): pos=", RampMotor.position(), sep="", precision=brain_precision)
+    brain.screen.next_row()
+    brain.screen.print("Intake (12): pos=", IntakeMotor.position(), sep="", precision=brain_precision)
+    brain.screen.next_row()
+    brain.screen.print("Slap (16): pos=", SlapMotor.position(), sep="", precision=brain_precision)
+    brain.scree.next_row()
+    brain.screen.print("RingDistanceSensor (20): ",RingDistanceSensor.object_distance(MM), "mm", precision=brain_precision, sep="")
+    # Controller screen
+    Controller1.screen.clear_row(1)
+    Controller1.screen.clear_row(2)
+    Controller1.screen.set_cursor(1,1)
+    Controller1.screen.print("1 ",RightTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
+    Controller1.screen.print("2 ",RightBotMotor.temperature(PERCENT),"%",sep="",precision=0)
+    Controller1.screen.next_row()
+    Controller1.screen.print("3 ",LeftTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
+    Controller1.screen.print("4 ",LeftBotMotor.temperature(PERCENT),"%",sep="",precision=0)
+
+    #
     set_all_motor_vel(autonVel)
 
     lastAction = ""
     repeat = 0
 
     while True:
-        # L1 makes fw and bw run 2 cm instead of 10 for precise controls
+        # Manual auton commands
         if Controller1.buttonL1.pressing():
             if Controller1.buttonUp.pressing():
                 drivePause = True
@@ -326,7 +360,7 @@ def auton_manual():
                 drivePause = True
                 wait(20, MSEC)
                 set_all_motor_vel(autonVel)
-                auton_score_ring(autonRamDistance)
+                auton_score_ring(autonRamDist)
                 Controller1.screen.set_cursor(3,1)
                 Controller1.screen.clear_row(3)
                 Controller1.screen.print("score ring")
@@ -398,35 +432,6 @@ def auton_manual():
                 drivePause = False
 
         wait(200, MSEC)
-
-
-def draw_debug_brain():
-    while True:
-        # Brain screen
-        brain.screen.clear_screen()
-        brain.screen.set_cursor(1,1)
-        brain.screen.print("RightTopMotor (1): temp=",RightTopMotor.temperature(PERCENT),"%"," pos=",RightTopMotor.position(), precision=brain_precision, sep="")
-        brain.screen.next_row()
-        brain.screen.print("RightBotMotor (2): temp=",RightBotMotor.temperature(PERCENT),"%"," pos=",RightBotMotor.position(), precision=brain_precision, sep="")
-        brain.screen.next_row()
-        brain.screen.print("LeftTopMotor (3): temp=",LeftTopMotor.temperature(PERCENT),"%"," pos=",LeftTopMotor.position(), precision=brain_precision, sep="")
-        brain.screen.next_row()
-        brain.screen.print("LeftBotMotor (4): temp=",LeftBotMotor.temperature(PERCENT),"%"," pos=",LeftBotMotor.position(), precision=brain_precision, sep="")
-        brain.screen.next_row()
-        brain.screen.print("RingDistanceSensor (20): ",RingDistanceSensor.object_distance(MM), "mm", precision=brain_precision, sep="")
-        wait(200, MSEC)
-def draw_debug_controller():
-    while True:
-        # Controller screen
-        Controller1.screen.clear_row(1)
-        Controller1.screen.clear_row(2)
-        Controller1.screen.set_cursor(1,1)
-        Controller1.screen.print("1 ",RightTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
-        Controller1.screen.print("2 ",RightBotMotor.temperature(PERCENT),"%",sep="",precision=0)
-        Controller1.screen.next_row()
-        Controller1.screen.print("3 ",LeftTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
-        Controller1.screen.print("4 ",LeftBotMotor.temperature(PERCENT),"%",sep="",precision=0)
-        wait(200, MSEC)
         
 #endregion DEBUG
 #region INPUT
@@ -486,12 +491,10 @@ def auton_init():
 
 # For starting driver mode
 def drive_init():
-    # start driver mode tasks
+    # start driver mode tasks - put functions that run in driver mode in driver_tasks
     driver_tasks = [
             Thread(driver_control),
-            Thread(draw_debug_brain),
-            Thread(draw_debug_controller),
-            Thread(auton_manual)
+            Thread(debug_fn)
         ]
 
     # Wait for the driver control period to end
