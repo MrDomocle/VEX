@@ -71,7 +71,29 @@ def set_all_motor_vel(vel):
 # driving
 def driver_control():
     global shakeLeftVel, shakeRightVel, drivePause
+    while True:
+        if not drivePause: # this flag is set when manual auton commands are running
+            # Set both sides to thrust stick initially
+            driveLeftVel = Controller1.axis3.position()
+            driveRightVel = Controller1.axis3.position()
 
+            # Change vel based on steering (right) stick
+            driveLeftVel = driveLeftVel + Controller1.axis1.position()
+            driveRightVel = driveRightVel - Controller1.axis1.position()
+
+            # Mux with shake (if any) and apply to drivebase
+            finalLeftVel = driveLeftVel + shakeLeftVel
+            finalRightVel = driveRightVel + shakeRightVel
+    
+            RightTopMotor.set_velocity(finalRightVel, PERCENT)
+            RightBotMotor.set_velocity(finalRightVel, PERCENT)
+            LeftTopMotor.set_velocity(finalLeftVel, PERCENT)
+            LeftBotMotor.set_velocity(finalLeftVel, PERCENT)
+    
+            RightTopMotor.spin(FORWARD)
+            RightBotMotor.spin(FORWARD)
+            LeftTopMotor.spin(FORWARD)
+            LeftBotMotor.spin(FORWARD)
         wait(20, MSEC)
 
 # Intake/ramp controls
