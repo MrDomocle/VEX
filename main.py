@@ -33,7 +33,7 @@ DEG_TO_CM = 7.66 # degrees of drivebase motor rotation per centimeter
 RAMP_FULL_DEG = 1241 # full ramp turn
 autonVel = 20 # drivebase velocity in auton
 autonRamVel = 50 # velocity for ramming into rings
-autonRamDist = 20 # distance to ram into rings for
+autonRamDist = 0 # distance to ram into rings for
 
 # Intake
 intakeVel = 100
@@ -228,7 +228,7 @@ def auton_score_ring(ram):
 
     # Ramp
     # move ring a little at first - ring usually in a bad position after this
-    RampMotor.spin_for(FORWARD, 1, TURN, wait=True)
+    RampMotor.spin_for(FORWARD, 1, TURNS, wait=True)
     # let ring settle
     wait(250, MSEC)
     # take ring up the stake (also subtract the turn made to settle ring)
@@ -254,42 +254,40 @@ def auton_sequence():
 # manual controls for launching auton routines - to make routes
 def debug_fn():
     global drivePause, autonVel, autonRamDist
-    # Print regular debug
-    # Brain screen
-    brain.screen.clear_screen()
-    brain.screen.set_cursor(1,1)
-    brain.screen.print("RightTopMotor (1): temp=",RightTopMotor.temperature(PERCENT),"%"," pos=",RightTopMotor.position(), precision=brain_precision, sep="")
-    brain.screen.next_row()
-    brain.screen.print("RightBotMotor (2): temp=",RightBotMotor.temperature(PERCENT),"%"," pos=",RightBotMotor.position(), precision=brain_precision, sep="")
-    brain.screen.next_row()
-    brain.screen.print("LeftTopMotor (3): temp=",LeftTopMotor.temperature(PERCENT),"%"," pos=",LeftTopMotor.position(), precision=brain_precision, sep="")
-    brain.screen.next_row()
-    brain.screen.print("LeftBotMotor (4): temp=",LeftBotMotor.temperature(PERCENT),"%"," pos=",LeftBotMotor.position(), precision=brain_precision, sep="")
-    brain.screen.next_row()
-    brain.screen.print("Ramp (21): pos=", RampMotor.position(), sep="", precision=brain_precision)
-    brain.screen.next_row()
-    brain.screen.print("Intake (12): pos=", IntakeMotor.position(), sep="", precision=brain_precision)
-    brain.screen.next_row()
-    brain.screen.print("Slap (16): pos=", SlapMotor.position(), sep="", precision=brain_precision)
-    brain.scree.next_row()
-    brain.screen.print("RingDistanceSensor (20): ",RingDistanceSensor.object_distance(MM), "mm", precision=brain_precision, sep="")
-    # Controller screen
-    Controller1.screen.clear_row(1)
-    Controller1.screen.clear_row(2)
-    Controller1.screen.set_cursor(1,1)
-    Controller1.screen.print("1 ",RightTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
-    Controller1.screen.print("2 ",RightBotMotor.temperature(PERCENT),"%",sep="",precision=0)
-    Controller1.screen.next_row()
-    Controller1.screen.print("3 ",LeftTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
-    Controller1.screen.print("4 ",LeftBotMotor.temperature(PERCENT),"%",sep="",precision=0)
-
-    #
-    set_all_motor_vel(autonVel)
 
     lastAction = ""
     repeat = 0
 
     while True:
+        # Print regular debug
+        # Brain screen
+        brain.screen.clear_screen()
+        brain.screen.set_cursor(1,1)
+        brain.screen.print("RightTopMotor (1): temp=",RightTopMotor.temperature(PERCENT),"%"," pos=",RightTopMotor.position(), precision=brain_precision, sep="")
+        brain.screen.next_row()
+        brain.screen.print("RightBotMotor (2): temp=",RightBotMotor.temperature(PERCENT),"%"," pos=",RightBotMotor.position(), precision=brain_precision, sep="")
+        brain.screen.next_row()
+        brain.screen.print("LeftTopMotor (3): temp=",LeftTopMotor.temperature(PERCENT),"%"," pos=",LeftTopMotor.position(), precision=brain_precision, sep="")
+        brain.screen.next_row()
+        brain.screen.print("LeftBotMotor (4): temp=",LeftBotMotor.temperature(PERCENT),"%"," pos=",LeftBotMotor.position(), precision=brain_precision, sep="")
+        brain.screen.next_row()
+        brain.screen.print("Ramp (21): pos=", RampMotor.position(), sep="", precision=brain_precision)
+        brain.screen.next_row()
+        brain.screen.print("Intake (12): pos=", IntakeMotor.position(), sep="", precision=brain_precision)
+        brain.screen.next_row()
+        brain.screen.print("Slap (16): pos=", SlapMotor.position(), sep="", precision=brain_precision)
+        brain.screen.next_row()
+        brain.screen.print("RingDistanceSensor (20): ",RingDistanceSensor.object_distance(MM), "mm", precision=brain_precision, sep="")
+        # Controller screen
+        Controller1.screen.clear_row(1)
+        Controller1.screen.clear_row(2)
+        Controller1.screen.set_cursor(1,1)
+        Controller1.screen.print("1 ",RightTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
+        Controller1.screen.print("2 ",RightBotMotor.temperature(PERCENT),"%",sep="",precision=0)
+        Controller1.screen.next_row()
+        Controller1.screen.print("3 ",LeftTopMotor.temperature(PERCENT),"% ",sep="",precision=0)
+        Controller1.screen.print("4 ",LeftBotMotor.temperature(PERCENT),"%",sep="",precision=0)
+
         # Manual auton commands
         if Controller1.buttonL1.pressing():
             if Controller1.buttonUp.pressing():
