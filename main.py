@@ -74,13 +74,6 @@ def driver_control():
 
         wait(20, MSEC)
 
-# Intake/ramp controls
-def intake_fw(): # R1
-    IntakeMotor.spin(REVERSE)
-def intake_bw(): # R2
-    IntakeMotor.spin(FORWARD)
-def intake_stop():
-    IntakeMotor.stop()
 
 def ramp_fw(): # L1
     RampMotor.spin(REVERSE)
