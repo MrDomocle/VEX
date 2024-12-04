@@ -7,7 +7,9 @@ LeftBotMotor = Motor(Ports.PORT4, GearSetting.RATIO_18_1, True)
 Controller1 = Controller(PRIMARY)
 IntakeMotor = Motor(Ports.PORT12, GearSetting.RATIO_18_1, False)
 RampMotor = Motor(Ports.PORT21, GearSetting.RATIO_18_1, True)
-SlapMotor = Motor(Ports.PORT16, GearSetting.RATIO_36_1, True)
+SlapMotor_A = Motor(Ports.PORT16, GearSetting.RATIO_36_1, True)
+SlapMotor_B = Motor(Ports.PORT13, GearSetting.RATIO_36_1, False)
+SlapMotorGroup = MotorGroup(SlapMotor_A, SlapMotor_B)
 MogomechSolenoid = DigitalOut(brain.three_wire_port.a)
 RingDistanceSensor = Distance(Ports.PORT20)
 
@@ -123,12 +125,12 @@ def mogomech_toggle(): #
 # Neutral stake slapper
 def slap_back(): # bring slapper to the upright (before slap) position
     # resetting to 0 and using spin_for to stop spinning into robot (_for sets a direction, _to_position doesn't)
-    SlapMotor.spin(REVERSE)
+    SlapMotorGroup.spin(REVERSE)
 # spin while A held
 def slap_forward(): 
-    SlapMotor.spin(FORWARD)
+    SlapMotorGroup.spin(FORWARD)
 def slap_stop():
-    SlapMotor.stop()
+    SlapMotorGroup.stop()
 
 # Shakey-shakey
 def shake_start():
@@ -275,7 +277,7 @@ def debug_fn():
         brain.screen.next_row()
         brain.screen.print("Intake (12): pos=", IntakeMotor.position(), sep="", precision=brain_precision)
         brain.screen.next_row()
-        brain.screen.print("Slap (16): pos=", SlapMotor.position(), sep="", precision=brain_precision)
+        brain.screen.print("Slap (16): pos=", SlapMotorGroup.position(), sep="", precision=brain_precision)
         brain.screen.next_row()
         brain.screen.print("RingDistanceSensor (20): ",RingDistanceSensor.object_distance(MM), "mm", precision=brain_precision, sep="")
         # Controller screen
@@ -474,7 +476,7 @@ def bot_init():
     global intakeVel, rampVel, slapVel
     IntakeMotor.set_velocity(intakeVel, PERCENT)
     RampMotor.set_velocity(rampVel, PERCENT)
-    SlapMotor.set_velocity(slapVel, PERCENT)
+    SlapMotorGroup.set_velocity(slapVel, PERCENT)
 
 # For starting auton mode
 def auton_init():
