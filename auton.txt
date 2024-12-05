@@ -1,0 +1,10 @@
+Code for different auton versions; paste it into auton_sequence() and download to brain
+Make sure you fully delete the previous sequence from the function before that
+Ramming into a stack of rings makes you eat the lower one
+
+RED ALLIANCE LEFT
+
+turn left 40
+fw 60
+fw 12 nowait
+grab ring
