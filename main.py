@@ -222,25 +222,10 @@ def auton_score_ring(ram):
         set_all_motor_vel(autonRamVel)
         auton_move_straight_cm(ram, wait=False)
     IntakeMotor.spin(FORWARD)
-    
-    # Take into bot
-    while not RingDistanceSensor.object_distance(MM) < 23:
-        wait(20, MSEC)
-    wait(250, MSEC)
-
-    # Ramp
-    # move ring a little at first - ring usually in a bad position after this
-    RampMotor.spin_for(FORWARD, 1, TURNS, wait=True)
-    # let ring settle
-    wait(250, MSEC)
-    # take ring up the stake (also subtract the turn made to settle ring)
-    RampMotor.spin_for(FORWARD, RAMP_FULL_DEG-360, DEGREES, wait=False)
-    wait(250, MSEC) # time for ring to exit intake
-    IntakeMotor.stop() # don't need it anymore
+    RampMotor.spin_for(FORWARD, RAMP_FULL_DEG, DEGREES)
+    IntakeMotor.stop()
     # set drivebase velocity back to normal
     set_all_motor_vel(autonVel)
-    while not RampMotor.is_done():
-        wait(20, MSEC)
 
 #endregion AUTON TOOLKIT
 #region AUTON SEQUENCE
