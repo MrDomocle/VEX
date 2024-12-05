@@ -2,9 +2,24 @@ Code for different auton versions; paste it into auton_sequence() and download t
 Make sure you fully delete the previous sequence from the function before that
 Ramming into a stack of rings makes you eat the lower one
 
-RED ALLIANCE LEFT
+DEFAULT - place as far from wall as possible. just move straight to let the other team do stuff
+auton_move_straight(10)
 
-turn left 40
-fw 60
-fw 12 nowait
-grab ring
+TOUCH LADDER - place as far from wall as posible, robot side touching tile edge closer to mid
+auton_move_straight(90)
+
+TOUCH LADDER CAREFULLY - place same as previous, but doesn't touch mobile goal
+auton_move_straight(35)
+auton_turn_right(35)
+auton_move_straight(36)
+
+MATRIX (red alliance) - place on outer tile edge
+auton_turn_left(110)
+auton_move_straight(-160)
+auton_turn_left(12)
+auton_move_straight(-10)
+toggle_mogomech()
+auton_score_ring()
+auton_turn_right(80)
+auton_move_straight(16)
+

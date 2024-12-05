@@ -214,23 +214,30 @@ def auton_move_straight_cm(d_cm, wait=True):
     if wait:
         wait_for_motion_stop()
 
-def auton_score_ring(ram):
+# Grab ring, but don't score
+def auton_take_ring():
+    IntakeMotor.spin(FORWARD)
+    wait(3, SECONDS)
+    IntakeMotor.stop()
+# Score ring
+def auton_score_ring():
     global autonRamVel, autonVel, RAMP_FULL_DEG
-    # ram into ring
-    if ram > 0:
-        # Faster motors for ramming
-        set_all_motor_vel(autonRamVel)
-        auton_move_straight_cm(ram, wait=False)
     IntakeMotor.spin(FORWARD)
     RampMotor.spin_for(FORWARD, RAMP_FULL_DEG, DEGREES)
     IntakeMotor.stop()
     # set drivebase velocity back to normal
-    set_all_motor_vel(autonVel)
 
 #endregion AUTON TOOLKIT
 #region AUTON SEQUENCE
 def auton_sequence():
-    auton_score_ring(autonRamDist)
+    auton_turn_left(110)
+    auton_move_straight(-160)
+    auton_turn_left(12)
+    auton_move_straight(-10)
+    toggle_mogomech()
+    auton_score_ring()
+    auton_turn_right(80)
+    auton_move_straight(16)
 
 #endregion AUTON SEQUENCE
 #region DEBUG
@@ -468,19 +475,24 @@ def auton_init():
     global autonVel
     set_all_motor_vel(autonVel)
     
-    auton_task = Thread(auton_sequence)
+    auton_tasks = [
+        Thread(auton_sequence),
+        Thread(debug_fn)
+    ]
     # wait for the driver control period to end
     while(competition.is_autonomous() and competition.is_enabled()):
         wait( 10, MSEC )
-    auton_task.stop()
+    # stop tasks
+    for t in auton_tasks:
+        t.stop()
 
 # For starting driver mode
 def drive_init():
     # start driver mode tasks - put functions that run in driver mode in driver_tasks
     driver_tasks = [
-            Thread(driver_control),
-            Thread(debug_fn)
-        ]
+        Thread(driver_control),
+        Thread(debug_fn)
+    ]
 
     # Wait for the driver control period to end
     while(competition.is_driver_control() and competition.is_enabled()):
