@@ -8,17 +8,42 @@ auton_move_straight(10)
 TOUCH LADDER - place as far from wall as posible, robot side touching tile edge closer to mid
 auton_move_straight(90)
 
+################ RED ALLIANCE
+
 TOUCH LADDER CAREFULLY - place same as previous, but doesn't touch mobile goal
 auton_move_straight(35)
 auton_turn_right(35)
 auton_move_straight(36)
+
+OUR OWN - start backwards at left inner edge
+auton_move_straight(-44)
+mogomech_toggle()
+score_ring()
+auton_turn_right(118)
+auton_move_straight(30)
+auton_move_straight(5, wait=False)
+auton_score_ring()
+auton_turn_right(45)
+auton_move_straight(29)
+auton_move_straight(5, wait=False)
+auton_take_ring()
+auton_turn_right(160)
+auton_move_straight(133)
+mogomech_toggle()
+auton_turn_left(100)
+auton_move_straight(34)
+auton_turn_left(43)
+auton_move_straight(-37)
+auton_score_ring()
+auton_move_straight(79)
+
 
 MATRIX (red alliance) - place on outer tile edge
 auton_turn_left(110)
 auton_move_straight(-160)
 auton_turn_left(12)
 auton_move_straight(-10)
-toggle_mogomech()
+mogomech_toggle()
 auton_score_ring()
 auton_turn_right(80)
 auton_move_straight(16)
