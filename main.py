@@ -26,13 +26,15 @@ vexcode_controller_1_precision = 0
 
 myVariable = 0 # holy variable, we don't use it but i will personally execute anyone who removes it
 
+isRed = True # set to false when blue alliance; inverts auton turning
+
 drivePause = False # flag to stop driving when manual auton commands are running
 mogomechOn = False # flag for toggling mogomech
 
 # Auton constants
 BOT_CIRCUMFERENCE = 109.55 # distance between wheels
 DEG_TO_CM = 7.66 # degrees of drivebase motor rotation per centimeter
-RAMP_FULL_DEG = 1241 # full ramp turn
+RAMP_FULL_DEG = 1241 # full ramp turn in motor degrees
 autonVel = 20 # drivebase velocity in auton
 autonRamVel = 50 # velocity for ramming into rings
 autonRamDist = 0 # distance to ram into rings for
@@ -46,7 +48,7 @@ slapVel = 50
 # Shake settings
 shakeVel = 100 # motor % vel when shaking
 shakeInterval = 150 # delay between alternating shake directions (ms)
-straightShake = True # move forward-back or spin left-right
+straightShake = True # move forward-back (true) or spin left-right (false)
 shakeRumble = "." # rumble pattern as morse code (...---...)
 # for storing shake speed modifier
 shakeLeftVel = 0
@@ -175,17 +177,25 @@ def wait_for_motion_stop():
         wait(20, MSEC)
 
 def auton_turn_left_deg(deg):
-    global BOT_CIRCUMFERENCE
+    global BOT_CIRCUMFERENCE, isRed
     leftTurnDist = BOT_CIRCUMFERENCE * (deg / 360)
-    auton_move_left_side_cm(-(leftTurnDist))
-    auton_move_right_side_cm(leftTurnDist)
+    if isRed:
+        auton_move_left_side_cm(-(leftTurnDist))
+        auton_move_right_side_cm(leftTurnDist)
+    else:
+        auton_move_left_side_cm(leftTurnDist)
+        auton_move_right_side_cm(-(leftTurnDist))
     wait_for_motion_stop()
 
 def auton_turn_right_deg(deg):
     global BOT_CIRCUMFERENCE
     rightTurnDist = BOT_CIRCUMFERENCE * (deg / 360)
-    auton_move_left_side_cm(rightTurnDist)
-    auton_move_right_side_cm(-(rightTurnDist))
+    if isRed:
+        auton_move_left_side_cm(rightTurnDist)
+        auton_move_right_side_cm(-(rightTurnDist))
+    else:
+        auton_move_left_side_cm(-(rightTurnDist))
+        auton_move_right_side_cm(rightTurnDist)
     wait_for_motion_stop()
 
 def auton_move_left_side_cm(d_cm):
