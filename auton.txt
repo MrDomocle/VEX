@@ -15,27 +15,28 @@ auton_move_straight(35)
 auton_turn_right(35)
 auton_move_straight(36)
 
-OUR OWN - start backwards at left inner edge
+OUR OWN - 3 ring, start backwards at left inner edge (aligned with the mobile goal)
 auton_move_straight(-44)
-mogomech_toggle()
-score_ring()
+mogomech_toggle() # get goal
+auton_score_ring() # score preload
 auton_turn_right(118)
 auton_move_straight(30)
-auton_move_straight(5, wait=False)
+auton_move_straight(5, wait=False) # score ring from ground (2nd)
 auton_score_ring()
 auton_turn_right(45)
 auton_move_straight(29)
-auton_move_straight(5, wait=False)
+auton_move_straight(5, wait=False) # take up ring to score on alliance stake
 auton_take_ring()
 auton_turn_right(160)
 auton_move_straight(133)
-mogomech_toggle()
+mogomech_toggle() # let go of goal 
 auton_turn_left(100)
-auton_move_straight(34)
+mogomech_toggle() # remove mogo to fit with wall stake
+auton_move_straight(34) # align with alliance stake
 auton_turn_left(43)
 auton_move_straight(-37)
-auton_score_ring()
-auton_move_straight(79)
+auton_score_ring() # score 3rd
+auton_move_straight(79) # move to touch the ladder
 
 
   MATRIX (red alliance) - place with left side touching inner tile edge
@@ -43,6 +44,7 @@ NOT GETTING CORNER RING, TOUCH LADDER
 auton_turn_left(15)
 auton_move_straight(-50)
 toggle_mogomech() # grab goal
+auton_score_ring() # score preload
 auton_turn_left(100)
 auton_move_straight(25)
 auton_move_straight(5, wait=False) # get second ring from floor
@@ -50,30 +52,19 @@ auton_score_ring()
 auton_turn_left(115) # go to touch ladder
 auton_move_straight(56)
 
-GETTING CORNER RING
+GETTING CORNER RING, NO LADDER
 auton_turn_left(15)
 auton_move_straight(-50)
 toggle_mogomech() # grab goal
-auton_turn_left(100) # 
+auton_score_ring() # score preload
+auton_turn_left(100)
 auton_move_straight(25)
-auton_move_straight(5, wait=False)
+auton_move_straight(5, wait=False) # score 2nd ring from floor
 auton_score_ring()
-auton_turn_right(65) 
+auton_turn_right(65) # go to corner rings
 auton_move_straight(65)
 auton_turn_right(55)
 auton_move_straight(37)
-auton_move_straight(3, wait=False)
+auton_move_straight(3, wait=False) # score corner ring (bottom, should be right colour)
 auton_score_ring()
-auton_move_straight(-50)
-
-
-BAD
-auton_turn_left(110)
-auton_move_straight(-160)
-auton_turn_left(12)
-auton_move_straight(-10)
-mogomech_toggle()
-auton_score_ring()
-auton_turn_right(80)
-auton_move_straight(16)
-
+auton_move_straight(-50) # get off the start line
