@@ -66,6 +66,26 @@ def set_all_motor_vel(vel):
     RightBotMotor.set_velocity(vel, PERCENT)
     LeftTopMotor.set_velocity(vel, PERCENT)
     LeftBotMotor.set_velocity(vel, PERCENT)
+def spin_all_motors(dir, vel):
+    RightTopMotor.spin(dir, velocity=vel)
+    RightBotMotor.spin(dir, velocity=vel)
+    LeftTopMotor.spin(dir, velocity=vel)
+    LeftBotMotor.spin(dir, velocity=vel)
+def stop_all_motors():
+    RightTopMotor.stop()
+    RightBotMotor.stop()
+    LeftTopMotor.stop()
+    LeftBotMotor.stop()
+def reset_all_motors():
+    RightTopMotor.reset_position()
+    RightBotMotor.reset_position()
+    LeftTopMotor.reset_position()
+    LeftBotMotor.reset_position()
+def go_to_zero_all_motors():
+    RightTopMotor.spin_to_position(0)
+    RightBotMotor.spin_to_position(0)
+    LeftTopMotor.spin_to_position(0)
+    LeftBotMotor.spin_to_position(0)
 
 #region DRIVE
 #------------------#
@@ -225,17 +245,51 @@ def auton_turn_right_deg(deg):
     wait_for_motion_stop()
 
 # Grab ring, but don't score
-def auton_take_ring():
-    IntakeMotor.spin(FORWARD)
-    wait(3, SECONDS)
-    IntakeMotor.stop()
+def auton_take_ring(*experimental=False, *limit=5):
+    if not experimental:
+        IntakeMotor.spin(FORWARD)
+        wait(3, SECONDS)
+        IntakeMotor.stop()
+    else:
+        reset_all_motors()
+        spin_all_motors(FORWARD, autonRamVel)
+        IntakeMotor.spin()
+        # wait either until timeout or until max ram distance
+        t = 0
+        while t < 3000:
+            t += 50
+            if (RightTopMotor.position()/DEG_TO_CM) > limit:
+                t = 1000
+            wait(50, MSEC)
+        stop_all_motors()
+        wait(1500, MSEC)
+        IntakeMotor.stop()
+        go_to_zero_all_motors()
 # Score ring
-def auton_score_ring():
+def auton_score_ring(*experimental=False, *limit=5):
     global autonRamVel, autonVel, RAMP_FULL_DEG
-    IntakeMotor.spin(FORWARD)
-    RampMotor.spin_for(FORWARD, RAMP_FULL_DEG, DEGREES)
-    IntakeMotor.stop()
-    # set drivebase velocity back to normal
+    if not experimental:
+        IntakeMotor.spin(FORWARD)
+        RampMotor.spin_for(FORWARD, RAMP_FULL_DEG, DEGREES)
+        IntakeMotor.stop()
+    else:
+        # ram
+        reset_all_motors()
+        spin_all_motors(FORWARD, autonRamVel)
+        IntakeMotor.spin()
+        RampMotor.spin()
+        # wait either until timeout or until max ram distance
+        t = 0
+        while t < 1000:
+            t += 50
+            if (RightTopMotor.position()/DEG_TO_CM) > limit:
+                t = 1000
+            wait(50, MSEC)
+        stop_all_motors()
+        wait(1500, MSEC)
+        IntakeMotor.stop()
+        RampMotor.stop()
+        go_to_zero_all_motors()
 
 #endregion AUTON TOOLKIT
 #region AUTON SEQUENCE
