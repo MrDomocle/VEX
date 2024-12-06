@@ -188,7 +188,7 @@ def auton_turn_left_deg(deg):
     wait_for_motion_stop()
 
 def auton_turn_right_deg(deg):
-    global BOT_CIRCUMFERENCE
+    global BOT_CIRCUMFERENCE, isRed
     rightTurnDist = BOT_CIRCUMFERENCE * (deg / 360)
     if isRed:
         auton_move_left_side_cm(rightTurnDist)
