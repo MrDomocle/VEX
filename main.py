@@ -176,28 +176,6 @@ def wait_for_motion_stop():
     while not (RightTopMotor.is_done() and RightBotMotor.is_done() and LeftTopMotor.is_done() and LeftBotMotor.is_done()):
         wait(20, MSEC)
 
-def auton_turn_left_deg(deg):
-    global BOT_CIRCUMFERENCE, isRed
-    leftTurnDist = BOT_CIRCUMFERENCE * (deg / 360)
-    if isRed:
-        auton_move_left_side_cm(-(leftTurnDist))
-        auton_move_right_side_cm(leftTurnDist)
-    else:
-        auton_move_left_side_cm(leftTurnDist)
-        auton_move_right_side_cm(-(leftTurnDist))
-    wait_for_motion_stop()
-
-def auton_turn_right_deg(deg):
-    global BOT_CIRCUMFERENCE, isRed
-    rightTurnDist = BOT_CIRCUMFERENCE * (deg / 360)
-    if isRed:
-        auton_move_left_side_cm(rightTurnDist)
-        auton_move_right_side_cm(-(rightTurnDist))
-    else:
-        auton_move_left_side_cm(-(rightTurnDist))
-        auton_move_right_side_cm(rightTurnDist)
-    wait_for_motion_stop()
-
 def auton_move_left_side_cm(d_cm):
     global DEG_TO_CM
     deg = math.fabs(d_cm * DEG_TO_CM)
@@ -223,6 +201,28 @@ def auton_move_straight_cm(d_cm, wait=True):
     auton_move_right_side_cm(d_cm)
     if wait:
         wait_for_motion_stop()
+
+def auton_turn_left_deg(deg):
+    global BOT_CIRCUMFERENCE, isRed
+    leftTurnDist = BOT_CIRCUMFERENCE * (deg / 360)
+    if isRed:
+        auton_move_left_side_cm(-(leftTurnDist))
+        auton_move_right_side_cm(leftTurnDist)
+    else:
+        auton_move_left_side_cm(leftTurnDist)
+        auton_move_right_side_cm(-(leftTurnDist))
+    wait_for_motion_stop()
+
+def auton_turn_right_deg(deg):
+    global BOT_CIRCUMFERENCE, isRed
+    rightTurnDist = BOT_CIRCUMFERENCE * (deg / 360)
+    if isRed:
+        auton_move_left_side_cm(rightTurnDist)
+        auton_move_right_side_cm(-(rightTurnDist))
+    else:
+        auton_move_left_side_cm(-(rightTurnDist))
+        auton_move_right_side_cm(rightTurnDist)
+    wait_for_motion_stop()
 
 # Grab ring, but don't score
 def auton_take_ring():

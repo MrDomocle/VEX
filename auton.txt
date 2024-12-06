@@ -2,69 +2,77 @@ Code for different auton versions; paste it into auton_sequence() and download t
 Make sure you fully delete the previous sequence from the function before that
 Ramming into a stack of rings makes you eat the lower one
 
+WORKING: take goal, score preload, turn arouund, let go, touch ladder
+    auton_move_straight_cm(-51.5)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    auton_turn_left_deg(180)
+    mogomech_toggle()
+    wait(500, MSEC)
+    auton_move_straight_cm(60)
+
 DEFAULT - place as far from wall as possible. just move straight to let the other team do stuff
-auton_move_straight(10)
+auton_move_straight_cm(10)
 
 TOUCH LADDER - place as far from wall as posible, robot side touching tile edge closer to mid
-auton_move_straight(90)
-
-################ RED ALLIANCE
+auton_move_straight_cm(90)
 
 TOUCH LADDER CAREFULLY - place same as previous, but doesn't touch mobile goal
-auton_move_straight(35)
-auton_turn_right(35)
-auton_move_straight(36)
+auton_move_straight_cm(35)
+auton_turn_right_deg(35)
+auton_move_straight_cm(36)
 
 OUR OWN - 3 ring, start backwards at left inner edge (aligned with the mobile goal)
-auton_move_straight(-44)
+auton_move_straight_cm(-44)
 mogomech_toggle() # get goal
 auton_score_ring() # score preload
-auton_turn_right(118)
-auton_move_straight(30)
-auton_move_straight(5, wait=False) # score ring from ground (2nd)
+auton_turn_right_deg(118)
+auton_move_straight_cm(35)
+auton_move_straight_cm(5, wait=False) # score ring from ground (2nd)
 auton_score_ring()
-auton_turn_right(45)
-auton_move_straight(29)
-auton_move_straight(5, wait=False) # take up ring to score on alliance stake
+auton_turn_right_deg(45)
+auton_move_straight_cm(35)
+auton_move_straight_cm(5, wait=False) # take up ring to score on alliance stake
 auton_take_ring()
-auton_turn_right(160)
-auton_move_straight(133)
+auton_turn_right_deg(160)
+auton_move_straight_cm(133)
 mogomech_toggle() # let go of goal 
-auton_turn_left(100)
+auton_turn_left_deg(100)
 mogomech_toggle() # remove mogo to fit with wall stake
-auton_move_straight(34) # align with alliance stake
-auton_turn_left(43)
-auton_move_straight(-37)
+auton_move_straight_cm(34) # align with alliance stake
+auton_turn_left_deg(43)
+auton_move_straight_cm(-37)
 auton_score_ring() # score 3rd
-auton_move_straight(79) # move to touch the ladder
+auton_move_straight_cm(79) # move to touch the ladder
 
 
   MATRIX (red alliance) - place with left side touching inner tile edge
 NOT GETTING CORNER RING, TOUCH LADDER
-auton_turn_left(15)
-auton_move_straight(-50)
-toggle_mogomech() # grab goal
+auton_turn_left_deg(15)
+auton_move_straight_cm(-50)
+mogomech_toggle() # grab goal
 auton_score_ring() # score preload
-auton_turn_left(100)
-auton_move_straight(25)
-auton_move_straight(5, wait=False) # get second ring from floor
+auton_turn_left_deg(100)
+auton_move_straight_cm(25)
+auton_move_straight_cm(5, wait=False) # get second ring from floor
 auton_score_ring()
-auton_turn_left(115) # go to touch ladder
-auton_move_straight(56)
+auton_turn_left_deg(115) # go to touch ladder
+auton_move_straight_cm(56)
 
 GETTING CORNER RING, NO LADDER
-auton_turn_left(15)
-auton_move_straight(-50)
+auton_turn_left_deg(15)
+auton_move_straight_cm(-50)
 toggle_mogomech() # grab goal
 auton_score_ring() # score preload
-auton_turn_left(100)
-auton_move_straight(25)
-auton_move_straight(5, wait=False) # score 2nd ring from floor
+auton_turn_left_deg(100)
+auton_move_straight_cm(25)
+auton_move_straight_cm(5, wait=False) # score 2nd ring from floor
 auton_score_ring()
-auton_turn_right(65) # go to corner rings
-auton_move_straight(65)
-auton_turn_right(55)
-auton_move_straight(37)
-auton_move_straight(3, wait=False) # score corner ring (bottom, should be right colour)
+auton_turn_right_deg(65) # go to corner rings
+auton_move_straight_cm(65)
+auton_turn_right_deg(55)
+auton_move_straight_cm(37)
+auton_move_straight_cm(3, wait=False) # score corner ring (bottom, should be right colour)
 auton_score_ring()
-auton_move_straight(-50) # get off the start line
+auton_move_straight_cm(-50) # get off the start line
