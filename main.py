@@ -245,7 +245,7 @@ def auton_turn_right_deg(deg):
     wait_for_motion_stop()
 
 # Grab ring, but don't score
-def auton_take_ring(*experimental=False, *limit=5):
+def auton_take_ring(experimental=False, limit=5):
     if not experimental:
         IntakeMotor.spin(FORWARD)
         wait(3, SECONDS)
@@ -258,7 +258,7 @@ def auton_take_ring(*experimental=False, *limit=5):
         t = 0
         while t < 3000:
             t += 50
-            if (RightTopMotor.position()/DEG_TO_CM) > limit:
+            if math.fabs(RightTopMotor.position()/DEG_TO_CM) > limit:
                 t = 1000
             wait(50, MSEC)
         stop_all_motors()
@@ -266,7 +266,7 @@ def auton_take_ring(*experimental=False, *limit=5):
         IntakeMotor.stop()
         go_to_zero_all_motors()
 # Score ring
-def auton_score_ring(*experimental=False, *limit=5):
+def auton_score_ring(experimental=False, limit=5):
     global autonRamVel, autonVel, RAMP_FULL_DEG
     if not experimental:
         IntakeMotor.spin(FORWARD)
@@ -282,7 +282,7 @@ def auton_score_ring(*experimental=False, *limit=5):
         t = 0
         while t < 1000:
             t += 50
-            if (RightTopMotor.position()/DEG_TO_CM) > limit:
+            if math.fabs(RightTopMotor.position()/DEG_TO_CM) > limit:
                 t = 1000
             wait(50, MSEC)
         stop_all_motors()
@@ -298,7 +298,7 @@ def auton_sequence():
     auton_move_straight(-160)
     auton_turn_left(12)
     auton_move_straight(-10)
-    toggle_mogomech()
+    mogomech_toggle()
     auton_score_ring()
     auton_turn_right(80)
     auton_move_straight(16)

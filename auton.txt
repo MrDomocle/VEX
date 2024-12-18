@@ -8,9 +8,36 @@ auton_move_straight_cm(10)
 TOUCH LADDER - place as far from wall as posible, robot side touching tile edge closer to mid
 auton_move_straight_cm(90)
 
+AAAAAAAAAAAAA
+auton_move_straight_cm(-60)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    wait(200, MSEC)
+    auton_turn_left_deg(75)
+    auton_move_straight_cm(36)
+    auton_move_straight_cm(10, wait=False)
+    auton_score_ring()
+    wait(200, MSEC)
+    auton_score_ring()
+
+
+
+    auton_move_straight_cm(-60)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    wait(200, MSEC)
+    auton_turn_left_deg(75)
+    auton_move_straight_cm(36)
+    auton_move_straight_cm(10, wait=False)
+    auton_score_ring()
+    wait(200, MSEC)
+    auton_score_ring()
+
 STABLE: take goal, score preload, turn around, let go, touch ladder
 SIDE WITH QUADRUPLE RINGS
-    auton_move_straight_cm(-49.5)
+    auton_move_straight_cm(-60)
     mogomech_toggle() # get goal
     wait(1, SECONDS)
     auton_score_ring() # score preload
@@ -19,7 +46,7 @@ SIDE WITH QUADRUPLE RINGS
     wait(500, MSEC)
     auton_move_straight_cm(60)
 SIDE WITH 5TH MGOAL
-    auton_move_straight_cm(-49.5)
+    auton_move_straight_cm(-60)
     mogomech_toggle() # get goal
     wait(1, SECONDS)
     auton_score_ring() # score preload
@@ -33,8 +60,8 @@ MATRIX
     auton_turn_left_deg(34)
     auton_move_straight_cm(-16.5)
 
-    toggle_mogomech()
-    wait(1, SECOND)
+    mogomech_toggle()
+    wait(1, SECONDS)
     auton_score_ring() # score 1st
     
     auton_move_straight_cm(10)
@@ -43,14 +70,13 @@ MATRIX
     
     auton_move_straight_cm(25, wait=False)
     auton_score_ring() # score 2nd from floor
-    auton_score_ring() # to be safe
 MATRIX experimental
     auton_move_straight_cm(-66) # get mobile goal
     auton_turn_left_deg(34)
     auton_move_straight_cm(-16.5)
 
-    toggle_mogomech()
-    wait(1, SECOND)
+    mogomech_toggle()
+    wait(1, SECONDS)
     auton_score_ring() # score 1st
     
     auton_move_straight_cm(10)
@@ -58,7 +84,39 @@ MATRIX experimental
     auton_move_straight_cm(28)
     
     auton_score_ring(experimental=True, limit=25) # score 2nd from floor
-    auton_score_ring() # to be safe
+
+NEW CARRYING
+    auton_turn_right_deg(40)
+    auton_move_straight_cm(-75) # get mogo at proper angle
+
+    wait(200, MSEC)
+    mogomech_toggle()
+    wait(800, MSEC)
+    auton_score_ring()
+
+    auton_turn_right_deg(67)
+    auton_move_straight_cm(32)
+    auton_score_ring()
+    
+    auton_turn_right_deg(58)
+    auton_move_straight_cm(38)
+    auton_take_ring()
+    
+    auton_turn_right_deg(168)
+    auton_move_straight_cm(100)
+    mogomech_toggle()
+    wait(300, MSEC)
+    
+    auton_move_straight_cm(32)
+    auton_turn_left_deg(68)
+    auton_move_straight_cm(60)
+
+    auton_turn_left_deg(90)
+    auton_move_straight_cm(-10)
+    auton_score_ring()
+
+    auton_move_straight_cm(100)
+
 
 EXPERIMENTAL CARRYING MODE
     auton_move_straight_cm(-49.5)
@@ -207,7 +265,7 @@ auton_move_straight_cm(56)
 GETTING CORNER RING, NO LADDER
 auton_turn_left_deg(15)
 auton_move_straight_cm(-50)
-toggle_mogomech() # grab goal
+mogomech_toggle() # grab goal
 auton_score_ring() # score preload
 auton_turn_left_deg(100)
 auton_move_straight_cm(25)
