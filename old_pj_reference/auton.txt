@@ -1,0 +1,280 @@
+Code for different auton versions; paste it into auton_sequence() and download to brain
+Make sure you fully delete the previous sequence from the function before that
+Ramming into a stack of rings makes you eat the lower one
+
+DEFAULT - place as far from wall as possible. just move straight to let the other team do stuff
+auton_move_straight_cm(10)
+
+TOUCH LADDER - place as far from wall as posible, robot side touching tile edge closer to mid
+auton_move_straight_cm(90)
+
+AAAAAAAAAAAAA
+auton_move_straight_cm(-60)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    wait(200, MSEC)
+    auton_turn_left_deg(75)
+    auton_move_straight_cm(36)
+    auton_move_straight_cm(10, wait=False)
+    auton_score_ring()
+    wait(200, MSEC)
+    auton_score_ring()
+
+
+
+    auton_move_straight_cm(-60)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    wait(200, MSEC)
+    auton_turn_left_deg(75)
+    auton_move_straight_cm(36)
+    auton_move_straight_cm(10, wait=False)
+    auton_score_ring()
+    wait(200, MSEC)
+    auton_score_ring()
+
+STABLE: take goal, score preload, turn around, let go, touch ladder
+SIDE WITH QUADRUPLE RINGS
+    auton_move_straight_cm(-60)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    auton_turn_left_deg(180)
+    mogomech_toggle()
+    wait(500, MSEC)
+    auton_move_straight_cm(60)
+SIDE WITH 5TH MGOAL
+    auton_move_straight_cm(-60)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    auton_turn_right_deg(180)
+    mogomech_toggle()
+    wait(500, MSEC)
+    auton_move_straight_cm(60)
+
+MATRIX
+    auton_move_straight_cm(-66) # get mobile goal
+    auton_turn_left_deg(34)
+    auton_move_straight_cm(-16.5)
+
+    mogomech_toggle()
+    wait(1, SECONDS)
+    auton_score_ring() # score 1st
+    
+    auton_move_straight_cm(10)
+    auton_turn_left_deg(90)
+    auton_move_straight_cm(28)
+    
+    auton_move_straight_cm(25, wait=False)
+    auton_score_ring() # score 2nd from floor
+MATRIX experimental
+    auton_move_straight_cm(-66) # get mobile goal
+    auton_turn_left_deg(34)
+    auton_move_straight_cm(-16.5)
+
+    mogomech_toggle()
+    wait(1, SECONDS)
+    auton_score_ring() # score 1st
+    
+    auton_move_straight_cm(10)
+    auton_turn_left_deg(90)
+    auton_move_straight_cm(28)
+    
+    auton_score_ring(experimental=True, limit=25) # score 2nd from floor
+
+NEW CARRYING
+    auton_turn_right_deg(40)
+    auton_move_straight_cm(-75) # get mogo at proper angle
+
+    wait(200, MSEC)
+    mogomech_toggle()
+    wait(800, MSEC)
+    auton_score_ring()
+
+    auton_turn_right_deg(67)
+    auton_move_straight_cm(32)
+    auton_score_ring()
+    
+    auton_turn_right_deg(58)
+    auton_move_straight_cm(38)
+    auton_take_ring()
+    
+    auton_turn_right_deg(168)
+    auton_move_straight_cm(100)
+    mogomech_toggle()
+    wait(300, MSEC)
+    
+    auton_move_straight_cm(32)
+    auton_turn_left_deg(68)
+    auton_move_straight_cm(60)
+
+    auton_turn_left_deg(90)
+    auton_move_straight_cm(-10)
+    auton_score_ring()
+
+    auton_move_straight_cm(100)
+
+
+EXPERIMENTAL CARRYING MODE
+    auton_move_straight_cm(-49.5)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+
+    auton_turn_left_deg(110)
+    auton_move_straight_cm(40)
+    auton_score_ring(experimental=True, limit=63) # score 2nd on mogo from ground
+
+    auton_turn_right_deg(55)
+    auton_move_straight_cm(34)
+    auton_take_ring(experimental=True, limit=10) # take ring for alliance stake
+
+    auton_move_straight_cm(-40) # set up to leave goal safely
+    auton_turn_right_deg(180)
+    mogomech_toggle() # leave goal
+    wait(500, MSEC)
+
+    auton_move_straight_cm(80) 
+    auton_turn_left_deg(75) # set up for alliance stake
+    auton_move_straight_cm(77)
+    auton_turn_left_deg(90)
+    auton_move_straight_cm(-10)
+
+    wait(500, MSEC)
+    auton_score_ring() # score alliance stake
+    auton_score_ring()
+
+    auton_move_straight_cm(8) # go to ladder
+    auton_turn_left_deg(50)
+    auton_move_straight_cm(50)
+    auton_turn_right_deg(65)
+    auton_move_straight_cm(57)
+
+SAME STUFF BUT USING NON-EXPERIMENTAL
+    auton_move_straight_cm(-49.5)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    auton_turn_left_deg(110)
+    auton_move_straight_cm(40)
+
+    auton_move_straight_cm(30, wait=False)
+    auton_score_ring() # score 2nd
+    auton_move_straight_cm(-30)
+
+    auton_turn_right_deg(55)
+    auton_move_straight_cm(34)
+    
+    auton_move_straight_cm(8, wait=False)
+    auton_take_ring() # take ring for alliance stake (this one is next to mid line, so be careful)
+    auton_move_straight_cm(-8)
+
+    auton_move_straight_cm(-40) # set up to leave goal safely
+    auton_turn_right_deg(180)
+    mogomech_toggle() # leave goal
+    wait(500, MSEC)
+
+    auton_move_straight_cm(80) 
+    auton_turn_left_deg(75) # set up for alliance stake
+    auton_move_straight_cm(77)
+    auton_turn_left_deg(90)
+    auton_move_straight_cm(-10)
+
+    wait(500, MSEC)
+    auton_score_ring() # score alliance stake
+    auton_score_ring()
+
+    auton_move_straight_cm(8) # go to ladder
+    auton_turn_left_deg(50)
+    auton_move_straight_cm(50)
+    auton_turn_right_deg(65)
+    auton_move_straight_cm(57)
+
+
+
+-------- SEMI BROKEN
+WORKING with wrong mobile goal rotation: take goal, score preload, turn around, let go, touch ladder
+SIDE WITH QUADRUPLE RINGS
+    auton_move_straight_cm(-51.5)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    auton_turn_left_deg(180)
+    mogomech_toggle()
+    wait(500, MSEC)
+    auton_move_straight_cm(60)
+SIDE WITH 5TH MGOAL
+    auton_move_straight_cm(-51.5)
+    mogomech_toggle() # get goal
+    wait(1, SECONDS)
+    auton_score_ring() # score preload
+    auton_turn_right_deg(180)
+    mogomech_toggle()
+    wait(500, MSEC)
+    auton_move_straight_cm(60)
+
+
+
+
+---------------------COMPLETELY BROKEN
+TOUCH LADDER CAREFULLY - place same as previous, but doesn't touch mobile goal
+auton_move_straight_cm(35)
+auton_turn_right_deg(35)
+auton_move_straight_cm(36)
+
+OUR OWN - 3 ring, start backwards at left inner edge (aligned with the mobile goal)
+auton_move_straight_cm(-44)
+mogomech_toggle() # get goal
+auton_score_ring() # score preload
+auton_turn_right_deg(118)
+auton_move_straight_cm(35)
+auton_move_straight_cm(5, wait=False) # score ring from ground (2nd)
+auton_score_ring()
+auton_turn_right_deg(45)
+auton_move_straight_cm(35)
+auton_move_straight_cm(5, wait=False) # take up ring to score on alliance stake
+auton_take_ring()
+auton_turn_right_deg(160)
+auton_move_straight_cm(133)
+mogomech_toggle() # let go of goal 
+auton_turn_left_deg(100)
+mogomech_toggle() # remove mogo to fit with wall stake
+auton_move_straight_cm(34) # align with alliance stake
+auton_turn_left_deg(43)
+auton_move_straight_cm(-37)
+auton_score_ring() # score 3rd
+auton_move_straight_cm(79) # move to touch the ladder
+
+
+  MATRIX (red alliance) - place with left side touching inner tile edge
+NOT GETTING CORNER RING, TOUCH LADDER
+auton_turn_left_deg(15)
+auton_move_straight_cm(-50)
+mogomech_toggle() # grab goal
+auton_score_ring() # score preload
+auton_turn_left_deg(100)
+auton_move_straight_cm(25)
+auton_move_straight_cm(5, wait=False) # get second ring from floor
+auton_score_ring()
+auton_turn_left_deg(115) # go to touch ladder
+auton_move_straight_cm(56)
+
+GETTING CORNER RING, NO LADDER
+auton_turn_left_deg(15)
+auton_move_straight_cm(-50)
+mogomech_toggle() # grab goal
+auton_score_ring() # score preload
+auton_turn_left_deg(100)
+auton_move_straight_cm(25)
+auton_move_straight_cm(5, wait=False) # score 2nd ring from floor
+auton_score_ring()
+auton_turn_right_deg(65) # go to corner rings
+auton_move_straight_cm(65)
+auton_turn_right_deg(55)
+auton_move_straight_cm(37)
+auton_move_straight_cm(3, wait=False) # score corner ring (bottom, should be right colour)
+auton_score_ring()
+auton_move_straight_cm(-50) # get off the start line
