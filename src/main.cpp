@@ -3,6 +3,14 @@
 #include <cmath>
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+
+// ################### !!!!CHECK B4 EVERY GAME!!!!!
+// AUTON SKILLS FALSE 4
+// RED HEAD : FALSE 0
+// BLUE HEAD : TRUE 0
+bool blue = false;
+int auton_mode = 1;
+
 // MARK: HARDWARE
 /**
    Hardware
@@ -23,7 +31,7 @@ pros::Rotation rot_y(9); // forward/back
 pros::Rotation rot_x(10); // left/right
 pros::Imu inertial(7); // heading
 lemlib::Drivetrain drivetrain(&left_mg, &right_mg, 12.85, lemlib::Omniwheel::NEW_4, 280, 2);
-lemlib::TrackingWheel track_y(&rot_y, lemlib::Omniwheel::NEW_275, 0.875);
+lemlib::TrackingWheel track_y(&rot_y, lemlib::Omniwheel::NEW_275, 0.7);
 lemlib::TrackingWheel track_x(&rot_x, lemlib::Omniwheel::NEW_275, 1.000);
 lemlib::OdomSensors sensors(&track_y, nullptr, &track_x, nullptr, &inertial);
 lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
@@ -36,14 +44,14 @@ lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
                                               0, // large error range timeout, in milliseconds
                                               0 // maximum acceleration (slew)
 );
-lemlib::ControllerSettings angular_controller(0.5, // proportional gain (kP)
+lemlib::ControllerSettings angular_controller(1,// proportional gain (kP)
                                               0, // integral gain (kI)
-                                              10, // derivative gain (kD)
+                                              20, // derivative gain (kD)
                                               0, // anti windup
-                                              1, // small error range, in degrees
-                                              100,//small error range timeout, in milliseconds
-                                              5, // large error range, in degrees
-                                              500, // large error range timeout, in milliseconds
+                                              0, // small error range, in degrees
+                                              0,//small error range timeout, in milliseconds
+                                              0, // large error range, in degrees
+                                              0, // large error range timeout, in milliseconds
                                               0 // maximum acceleration (slew)
 );
 lemlib::Chassis chassis(drivetrain, // drivetrain settings
@@ -75,8 +83,10 @@ float d_lat = -1; // lateral difference from what we actually want
 const float BOT_CIRCUMFERENCE = 109.55; // distance between wheels
 const float DEG_TO_CM = 7.66; // degrees of drivebase motor rotation per centimeter
 const float RAMP_FULL_DEG = 1241; // full ramp turn in motor degrees
-int auton_volt = 50;
-int auton_ram_volt = 64;
+int auton_ram_volt = 90;
+int auton_fast_volt = 80;
+int auton_slow_volt = 45;
+int auton_volt = auton_fast_volt;
 
 // Global technical vars (do not change)
 int shake_mod = 0;
@@ -89,36 +99,22 @@ int brain_disp_mode = 0; // 0 - temperature & positions; 1 - odom
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
+void on_left_button() {
+	auton_mode = 0;
+	pros::lcd::set_text(5, "Auton mode 0");
+}
 void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
+	auton_mode = 1;
+	pros::lcd::set_text(5, "Auton mode 1");
 }
-
+void on_right_button() {
+	auton_mode = 2;
+	pros::lcd::set_text(5, "Auton mode 2");
+}
 // MARK: ROUTINES
-void au_moveleft(float cm) {
-	float d_deg = cm * DEG_TO_CM;
-	//float d_deg = std::abs(d_deg_raw);
-	left_mg.move_relative(d_deg, auton_volt);
-}
-void au_moveright(float cm) {
-	float d_deg = cm * DEG_TO_CM;
-	d_deg = d_deg*0.00266389;
-	//float d_deg = std::abs(d_deg_raw);
-	right_mg.move_relative(d_deg, auton_volt);
-}
 
-void au_turn(float deg) {
-	float circle_dist = BOT_CIRCUMFERENCE * (deg/360.0);
-
-	au_moveleft(circle_dist);
-	au_moveright(-circle_dist);
-}
-
+// Call with interval
+// Reset shake_mod manually
 void shake() {
 	static bool dir = false;
 	dir = !dir;
@@ -182,26 +178,115 @@ void debug_info() {
 		pros::delay(100);
 	}
 }
+
+float inch_to_cm(float inch) {
+	return (inch*2.54f);
+}
+
+// MARK: AUTON ROUTINES
+void au_moveleft(float cm) {
+	float d_deg = cm * DEG_TO_CM;
+	//float d_deg = std::abs(d_deg_raw);
+	left_mg.move_relative(d_deg, auton_volt);
+}
+void au_moveright(float cm) {
+	float d_deg = cm * DEG_TO_CM;
+	d_deg = d_deg*0.00266389;
+	//float d_deg = std::abs(d_deg_raw);
+	right_mg.move_relative(d_deg, auton_volt);
+}
+
+void au_moveboth(float cm, bool wait=true, bool brake=true, bool ram=false) {
+	master.set_text(0,0, "moving "+std::to_string(cm));
+	if (ram) {
+		auton_volt = auton_ram_volt;
+	}
+    au_moveleft(cm);
+	au_moveright(cm);
+	if (ram) {
+		auton_volt = auton_fast_volt;
+	}
+	if (wait) {
+		while ((fabs(left_mg.get_position() - left_mg.get_target_position(0)) > 3) || (fabs(right_mg.get_position() - right_mg.get_target_position(0)) > 3)) {
+			pros::delay(20);
+		}
+		left_mg.brake();
+		right_mg.brake();
+	}
+}
+
+void au_turn(float deg) {
+	// some of the measurements are incorrect, so the bot consistently turns ~3% less than we tell it to.
+	// so to fix this, just divide by the other 97%
+	float deg_final = deg/(0.963);
+	float circle_dist = BOT_CIRCUMFERENCE * (deg_final/360.0);
+
+	auton_volt = auton_slow_volt;
+	au_moveleft(circle_dist);
+	au_moveright(-circle_dist);
+	auton_volt = auton_fast_volt;
+}
+void au_turn_to(float heading, bool wait=true) {
+	if (blue) { heading = -heading; }
+	// needs to be inverted for whatever reason (positive is left)
+    float deg = chassis.getPose().theta-heading;
+	au_turn(deg);
+    if (wait) {
+		while ((fabs(left_mg.get_position() - left_mg.get_target_position(0)) > 2) || (fabs(right_mg.get_position() - right_mg.get_target_position(0)) > 2)) {
+			pros::delay(20);
+		}
+		left_mg.brake();
+		right_mg.brake();
+	}
+
+}
+
+void au_move_to(float x, float y, bool backwards=false, bool wait=true, bool ram=false) {
+	if (blue) { x = -x; }
+    lemlib::Pose target(x, y, 0);
+	float dist = chassis.getPose().distance(target);
+	// apply backwards flag
+	dist = backwards ? -inch_to_cm(dist) : inch_to_cm(dist);
+    au_moveboth(dist, wait, ram);
+}
+
+void au_mogo(int delay) {
+    mogomech();
+    pros::delay(delay);
+}
+void au_intake(float spins) {
+	intake_mg.move_relative(RAMP_FULL_DEG*spins, 255);
+	while (fabs(intake_mg.get_position() - intake_mg.get_target_position(0)) > 30) {
+		pros::delay(20);
+	}
+}
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+ // MARK: INIT
 void initialize() {
 	// Screen
 	pros::lcd::initialize();
 	pros::Task debug_task(debug_info);
-
+    
+	pros::lcd::register_btn0_cb(on_left_button);
 	pros::lcd::register_btn1_cb(on_center_button);
+	pros::lcd::register_btn2_cb(on_right_button);
+
 	mogomech(); // make sure its off at the beginning
 
 	left_mg.set_encoder_units_all(pros::E_MOTOR_ENCODER_DEGREES);
 	right_mg.set_encoder_units_all(pros::E_MOTOR_ENCODER_DEGREES);
+	intake_mg.set_encoder_units_all(pros::E_MOTOR_ENCODER_DEGREES);
 	left_mg.tare_position_all();
 	right_mg.tare_position_all();
+	intake_mg.tare_position_all();
 
 	chassis.calibrate();
+	pros::delay(150);
 }
 
 /**
@@ -233,12 +318,85 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+ // MARK: AUTON
 void autonomous() {
 	chassis.setPose(0, 0, 0);
-    //chassis.moveToPoint(0,30, 500);
-	au_turn(90);
-	//left_mg.move_relative(300, auton_volt);
-	//left_mg.move_relative(300, auton_volt);
+	/* 
+	 * Takes mogo in front
+	 * Scores: preload, then ring on the left of mogo, then a ring from big pile
+	 * Set bot on left side of field (red), facing mogo
+	 * ~92% reliable by ring count (15 jan)
+	 * ~62% reliable by ring count (16 jan, blue side)
+	 * NOT COMPATIBLE W/ MATRIX
+	 */
+	if (auton_mode == 0) {
+		au_move_to(0, -18, true);
+		au_mogo(500);
+		au_intake(0.5);
+
+		au_turn_to(100);
+
+		au_move_to(11,-19);
+		au_move_to(16,-19, false, false);
+		au_intake(2.5);
+		au_turn_to(170);
+
+		au_move_to(20,-30);
+
+		au_move_to(19.5,-34, false, false);
+		au_intake(2.5);
+		intake_mg.move(127);
+	/* 
+	 * Matrix ver. - start on the right side
+	 * Takes mogo in front
+	 * Scores: preload, ring to the right
+	 * 
+	 */
+	} else if (auton_mode == 1) {
+		au_move_to(0, -18, true);
+		au_mogo(500);
+		au_intake(0.5);
+
+		au_turn_to(-105);
+
+		au_move_to(-11,-19);
+		au_move_to(-16,-19, false, false);
+		au_intake(3);
+		intake_mg.move(127);
+
+		// au_turn_to(-77);
+		// au_move_to(15,-32, true);
+	/*
+	 * Let the other team cook (leave start line)
+	 */
+	} else if (auton_mode == 2) {
+		au_move_to(0,-15, true);
+	/*
+	 * ROBOT SKILLS
+	 */
+	} else if (auton_mode == 4) { // set to 4 at compile time
+		au_move_to(0,-2.5,true);
+		au_mogo(500);
+		au_intake(1);
+
+		au_turn_to(110);
+		au_move_to(12, -6);
+		au_move_to(18,-8, false, false);
+		au_intake(3);
+
+		au_turn_to(90);
+		au_move_to(21,-8);
+		au_move_to(29,-6.5, false, false);
+		au_intake(3);
+
+		au_turn_to(192);
+		// au_move_to(39,-2.5,true);
+		// au_mogo(1000);
+		// au_move_to(36.5,-6);
+
+	}
+	left_mg.move(0);
+	right_mg.move(0);
 }
 
 // MARK: OPCONTROL

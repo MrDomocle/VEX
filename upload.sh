@@ -1,2 +1,2 @@
 #!/bin/bash
-pros make && pros upload --slot 2
+pros make && pros upload && date
