@@ -6,9 +6,9 @@
 
 // ################### !!!!CHECK B4 EVERY GAME!!!!!
 // AUTON SKILLS FALSE 4
-// RED HEAD : FALSE 0
-// BLUE HEAD : TRUE 0
-bool blue = false;
+// RED HEAD TO HEAD : FALSE 0
+// BLUE HEAD T: TRUE 0
+bool blue = true;
 int auton_mode = 1;
 
 // MARK: HARDWARE
@@ -25,7 +25,7 @@ pros::Motor left_top(3, pros::MotorGearset::green);
 pros::Motor left_bot(-4, pros::MotorGearset::green);
 pros::MotorGroup intake_mg({12, -21});
 pros::Motor slap(-16);
-pros::adi::DigitalOut mogo_solenoid(1);
+pros::adi::DigitalOut mogo_solenoid(4);
 
 pros::Rotation rot_y(9); // forward/back
 pros::Rotation rot_x(10); // left/right
@@ -330,20 +330,20 @@ void autonomous() {
 	 * NOT COMPATIBLE W/ MATRIX
 	 */
 	if (auton_mode == 0) {
-		au_move_to(0, -18, true);
+		au_move_to(0, -16, true);
 		au_mogo(500);
 		au_intake(0.5);
 
-		au_turn_to(100);
+		au_turn_to(105);
 
-		au_move_to(11,-19);
-		au_move_to(16,-19, false, false);
+		au_move_to(11.5,-17.3);
+		au_move_to(16.5,-18.5, false, false);
 		au_intake(2.5);
-		au_turn_to(170);
+		au_turn_to(155);
 
-		au_move_to(20,-30);
+		au_move_to(19.5,-29);
 
-		au_move_to(19.5,-34, false, false);
+		au_move_to(21,-31, false, false);
 		au_intake(2.5);
 		intake_mg.move(127);
 	/* 
@@ -353,16 +353,15 @@ void autonomous() {
 	 * 
 	 */
 	} else if (auton_mode == 1) {
-		au_move_to(0, -18, true);
+		au_move_to(0, -16, true);
 		au_mogo(500);
 		au_intake(0.5);
 
-		au_turn_to(-105);
+		au_turn_to(105);
 
-		au_move_to(-11,-19);
-		au_move_to(-16,-19, false, false);
-		au_intake(3);
-		intake_mg.move(127);
+		au_move_to(11.5,-17.3);
+		au_move_to(16.5,-18.5, false, false);
+		au_intake(2.5);
 
 		// au_turn_to(-77);
 		// au_move_to(15,-32, true);
@@ -370,29 +369,16 @@ void autonomous() {
 	 * Let the other team cook (leave start line)
 	 */
 	} else if (auton_mode == 2) {
-		au_move_to(0,-15, true);
+		au_move_to(0, -16, true);
+		au_mogo(500);
+		au_intake(0.5);
 	/*
 	 * ROBOT SKILLS
 	 */
 	} else if (auton_mode == 4) { // set to 4 at compile time
-		au_move_to(0,-2.5,true);
+		au_move_to(0,-2.3,true);
 		au_mogo(500);
 		au_intake(1);
-
-		au_turn_to(110);
-		au_move_to(12, -6);
-		au_move_to(18,-8, false, false);
-		au_intake(3);
-
-		au_turn_to(90);
-		au_move_to(21,-8);
-		au_move_to(29,-6.5, false, false);
-		au_intake(3);
-
-		au_turn_to(192);
-		// au_move_to(39,-2.5,true);
-		// au_mogo(1000);
-		// au_move_to(36.5,-6);
 
 	}
 	left_mg.move(0);
